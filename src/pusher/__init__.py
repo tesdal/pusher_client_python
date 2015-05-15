@@ -3,6 +3,7 @@ import hashlib
 import hmac
 import httplib
 import os
+import re
 import string
 import sys
 import time
@@ -21,6 +22,7 @@ sha_constructor = hashlib.sha256
 CHANNEL_ALLOWED_CHARS = string.ascii_letters + string.digits + '_-=@,.;'
 EVENT_ALLOWED_CHARS = string.ascii_letters + string.digits + '_-'
 TRANS_TABLE = string.maketrans('', '')
+SOCKET_ID_RE = re.compile(r'^\d+\.\d+$')
 
 
 def verify_chars(chars, allowed_chars):
@@ -89,7 +91,7 @@ class Pusher(object):
         self._channels = {}
 
     def __getitem__(self, key):
-        if not key in self._channels:
+        if key not in self._channels:
             return self._make_channel(key)
         return self._channels[key]
 
@@ -197,6 +199,8 @@ class Channel(object):
         ret = "auth_key=%s&auth_timestamp=%s&auth_version=1.0&body_md5=%s&name=%s" % (
             self.pusher.key, int(time.time()), hash_str, event)
         if socket_id:
+            if not SOCKET_ID_RE.match(socket_id):
+                raise ValueError('Invalid socket_id')
             ret += "&socket_id=" + unicode(socket_id)
         return ret
 
@@ -230,6 +234,8 @@ class Channel(object):
     def authentication_string(self, socket_id, custom_string=None):
         if not socket_id:
             raise Exception("Invalid socket_id")
+        elif not SOCKET_ID_RE.match(socket_id):
+            raise ValueError('Invalid socket_id')
 
         string_to_sign = "%s:%s" % (socket_id, self.name)
 

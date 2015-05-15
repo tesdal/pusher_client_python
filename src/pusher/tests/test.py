@@ -108,16 +108,16 @@ class RequestTest(PusherTestCase):
         trigger_args = (
             'test-event',
             {'param1': 'value1', 'param2': 'value2'},
-            'test-socket-id'
+            '1.23'
         )
         expected_query = {
             'auth_version': '1.0',
             'auth_key': 'test-key',
             'auth_timestamp': '1272382015',
-            'auth_signature': 'be8985b730755f983224f23bcbe3be0876937b3bfe408014c19588435a8caffb',
+            'auth_signature': 'd513ddda58a8d6db96895abdcd7e7743fa78a72a186f7c491c19ad5410eb06c6',
             'body_md5': 'd173e46bb2a4cf2d48a10bc13ec43d5a',
             'name': 'test-event',
-            'socket_id': 'test-socket-id'
+            'socket_id': '1.23'
         }
         self.assert_request_is_correct(trigger_args, expected_query)
 
@@ -184,14 +184,14 @@ class ResponsesTest(PusherTestCase):
 
     def test_authenticate_socket(self):
         data = {'uid': 123, 'info': {'name': 'Foo'}}
-        auth = self.channel.authenticate('socket_id', data)
+        auth = self.channel.authenticate('1.23', data)
 
-        expected_auth = {'auth': 'test-key:3e976eef54ba057389c6530ac5a0c95d55043f4cf8013e47b99d20d9ce5144b4',
+        expected_auth = {'auth': 'test-key:360b67551ca1ab1a759098cf2a62bccea6db7c4c2b588d020ac297eb4e91aea7',
                          'channel_data': '{"info": {"name": "Foo"}, "uid": 123}'}
         eq_(auth, expected_auth)
 
     def test_authenticate_socket_with_no_data(self):
-        auth = self.channel.authenticate('socket_id')
+        auth = self.channel.authenticate('1.23')
 
-        expected_auth = {'auth': 'test-key:8ca017edcf179c9e6a5ff9708f630773bb0a367428c671cdf08972380400498e'}
+        expected_auth = {'auth': 'test-key:931ab82a90292b4523d68802dcc0386f501b39c5e2910b5f00751ecc798f7c5a'}
         eq_(auth, expected_auth)
